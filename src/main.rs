@@ -15,15 +15,20 @@ use actix_web::{
 use askama::Template;
 
 #[derive(Template)]
+#[template(path = "base.html")]
+struct Base;
+
+#[derive(Template)]
+#[template(path = "index.html")]
+struct Index;
+
+#[derive(Template)]
 #[template(path = "user.html")]
 struct UserTemplate<'a> {
     name: &'a str,
     text: &'a str,
 }
 
-#[derive(Template)]
-#[template(path = "index.html")]
-struct Index;
 
 fn index(query: Query<HashMap<String, String>>) -> Result<HttpResponse> {
     let s = if let Some(name) = query.get("name") {
