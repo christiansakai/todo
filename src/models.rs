@@ -22,28 +22,28 @@ pub struct AddTodo {
 
 #[derive(Insertable)]
 #[table_name = "todos"]
-struct RemoveTodo {
+pub struct RemoveTodo {
     pub id: i32,
 }
 
 impl Todo {
-    pub fn add_link(link: AddTodo, conn: &PgConnection) -> QueryResult<Todo> {
+    pub fn add_todo(todo: AddTodo, conn: &PgConnection) -> QueryResult<Todo> {
         diesel::insert_into(todos::table)
-            .values(&link)
+            .values(&todo)
             .get_result(conn)
     }
 
-    pub fn remove_link(id: i32, conn: &PgConnection) -> QueryResult<usize> {
+    pub fn remove_todo(id: i32, conn: &PgConnection) -> QueryResult<usize> {
         diesel::delete(todos::table.filter(todos::id.eq(id)))
             .execute(conn)
     }
 
-    pub fn get_links(conn: &PgConnection) -> QueryResult<Vec<Todo>> {
+    pub fn get_todos(conn: &PgConnection) -> QueryResult<Vec<Todo>> {
         todos::table.order(todos::id.desc())
             .load::<Todo>(conn)
     }
 
-    pub fn get_link(id: i32, conn: &PgConnection) -> QueryResult<Todo> {
+    pub fn get_todo(id: i32, conn: &PgConnection) -> QueryResult<Todo> {
         todos::table.filter(todos::id.eq(id))
             .get_result(conn)
     }
