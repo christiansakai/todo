@@ -1,0 +1,11 @@
+[package]
+name = "todo"
+version = "0.1.0"
+authors = ["Christian Sakai <christianmsakai@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+actix = "0.7.9"
+actix-web = "0.7.18"
+askama = "0.8.0"
+env_logger = "0.6.1"
