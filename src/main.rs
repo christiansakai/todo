@@ -21,7 +21,10 @@ use diesel::Connection;
 use diesel::pg::PgConnection;
 
 mod schema;
+mod state;
 mod models;
+
+use crate::state::State;
 
 #[derive(Template)]
 #[template(path = "base.html")]
@@ -52,34 +55,12 @@ fn index(query: Query<HashMap<String, String>>) -> Result<HttpResponse> {
     Ok(HttpResponse::Ok().content_type("text/html").body(s))
 }
 
-fn establish_connection() -> PgConnection {
-    let database_url = env::var("DATABASE_URL")
-        .expect("DATABASE_URL must be set");
-
-    PgConnection::establish(&database_url)
-        .expect(&format!("Error connecting to {}", database_url))
-}
-
 fn main() {
-    dotenv().ok();
-    env_logger::init();
+    let _ = dotenv().ok();
+    let _ = env_logger::init();
 
-    // DB
-    let connection = establish_connection();
-    // let results = posts.filter(published.eq(true))
-    //     .limit(5)
-    //     .load::<Post>(&connection)
-    //     .expect("Error loading posts");
-
-    // println!("Displaying {} posts", results.len());
-    // for post in results {
-    //     println!("{}", post.title);
-    //     println!("----------\n");
-    //     println!("{}", post.body);
-    // }
-
-    // Web
-    let sys = System::new("todo");
+    let system = System::new("todo");
+    let state = State::init();
 
     server::new(|| {
         App::new()
@@ -93,5 +74,5 @@ fn main() {
 
     println!("Started http server: 127.0.0.1:8080");
 
-    let _ = sys.run();
+    let _ = system.run();
 }
