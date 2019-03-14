@@ -1,8 +1,43 @@
 use std::env;
+use std::collections::HashMap;
 
 use actix::{System};
-use actix_web::{middleware, server};
-use actix_web::{App, HttpRequest};
+use actix_web::{
+    middleware,
+    server,
+    http,
+    App,
+    HttpRequest,
+    HttpResponse,
+    Query,
+    Result,
+};
+use askama::Template;
+
+#[derive(Template)]
+#[template(path = "user.html")]
+struct UserTemplate<'a> {
+    name: &'a str,
+    text: &'a str,
+}
+
+#[derive(Template)]
+#[template(path = "index.html")]
+struct Index;
+
+fn index(query: Query<HashMap<String, String>>) -> Result<HttpResponse> {
+    let s = if let Some(name) = query.get("name") {
+        UserTemplate {
+            name: name,
+            text: "Welcome!",
+        }.render()
+            .unwrap()
+    } else {
+        Index.render().unwrap()
+    };
+
+    Ok(HttpResponse::Ok().content_type("text/html").body(s))
+}
 
 fn main() {
     env::set_var("RUST_LOG",  "actix_web=info");
@@ -13,8 +48,7 @@ fn main() {
     server::new(|| {
         App::new()
             .middleware(middleware::Logger::default())
-            .resource("/index.html", |r| r.f(index)) 
-            .resource("/", |r| r.f(index)) 
+            .resource("/", |r| r.method(http::Method::GET).with(index)) 
     })
     .bind("127.0.0.1:8080")
     .unwrap()
@@ -23,8 +57,4 @@ fn main() {
     println!("Started http server: 127.0.0.1:8080");
 
     let _ = sys.run();
-}
-
-fn index(_req: &HttpRequest) -> &'static str {
-    "Hello world!"
 }
