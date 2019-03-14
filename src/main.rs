@@ -6,6 +6,7 @@ use actix_web::{
     middleware,
     server,
     http,
+    fs,
     App,
     HttpRequest,
     HttpResponse,
@@ -28,7 +29,6 @@ struct UserTemplate<'a> {
     name: &'a str,
     text: &'a str,
 }
-
 
 fn index(query: Query<HashMap<String, String>>) -> Result<HttpResponse> {
     let s = if let Some(name) = query.get("name") {
@@ -53,6 +53,7 @@ fn main() {
     server::new(|| {
         App::new()
             .middleware(middleware::Logger::default())
+            .handler("/static", fs::StaticFiles::new("./static/").unwrap())
             .resource("/", |r| r.method(http::Method::GET).with(index)) 
     })
     .bind("127.0.0.1:8080")
