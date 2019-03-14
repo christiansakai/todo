@@ -141,6 +141,7 @@ impl Handler<RemoveTodoMsg> for Db {
     }
 }
 
+#[derive(Clone)]
 pub struct State(Addr<Db>);
 
 impl State {

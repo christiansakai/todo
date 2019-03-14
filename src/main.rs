@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 use actix::{System};
 use actix_web::{
-    middleware,
+    middleware::Logger,
     server,
     http,
     fs,
@@ -19,6 +19,7 @@ use askama::Template;
 use dotenv::dotenv;
 use diesel::Connection;
 use diesel::pg::PgConnection;
+use log::info;
 
 mod schema;
 mod state;
@@ -59,20 +60,23 @@ fn main() {
     let _ = dotenv().ok();
     let _ = env_logger::init();
 
+    info!("Starting http server: 127.0.0.1:8080");
+
     let system = System::new("todo");
     let state = State::init();
 
-    server::new(|| {
-        App::new()
-            .middleware(middleware::Logger::default())
-            .handler("/static", fs::StaticFiles::new("./static/").unwrap())
+    server::new(move || {
+        App::with_state(state.clone())
+            .middleware(Logger::default())
+            .handler(
+                "/static",
+                fs::StaticFiles::new("./static/").unwrap(),
+            )
             .resource("/", |r| r.method(http::Method::GET).with(index)) 
     })
     .bind("127.0.0.1:8080")
     .unwrap()
     .start();
-
-    println!("Started http server: 127.0.0.1:8080");
 
     let _ = system.run();
 }
